@@ -6138,6 +6138,7 @@ bool
 producer_is_realview (const char *producer)
 {
   static const char *const arm_idents[] = {
+    "Component: ARM Compiler",
     "ARM C Compiler, ADS",
     "Thumb C Compiler, ADS",
     "ARM C++ Compiler, ADS",

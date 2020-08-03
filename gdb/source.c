@@ -704,6 +704,31 @@ prepare_path_for_appending (const char *path)
   return path;
 }
 
+// FIX can't parse windows path issue {
+const char *fix_windows_path(const char *string)
+{
+  static char string_fix[PATH_MAX];
+  int i, j;
+  bool prev_is_sep = false;
+  for (i=0, j=0; i<PATH_MAX && string[i]; ++i)
+  {
+    if (string[i]=='\\' || string[i]=='/')
+    {
+      if (!prev_is_sep)
+        string_fix[j++] = '/';
+      prev_is_sep = true;
+    }
+    else
+    {
+      prev_is_sep = false;
+      string_fix[j++] = string[i];
+    }
+  }
+  string_fix[j] = '\0';
+
+  return string_fix;
+}
+
 /* Open a file named STRING, searching path PATH (dir names sep by some char)
    using mode MODE in the calls to open.  You cannot use this function to
    create files (O_CREAT).
@@ -770,6 +795,8 @@ openp (const char *path, openp_flags opts, const char *string,
     path = ".";
 
   mode |= O_BINARY;
+
+  string = fix_windows_path(string);
 
   if ((opts & OPF_TRY_CWD_FIRST) || IS_ABSOLUTE_PATH (string))
     {
@@ -1177,7 +1204,7 @@ symtab_to_filename_for_display (struct symtab *symtab)
   else if (filename_display_string == filename_display_absolute)
     return symtab_to_fullname (symtab);
   else if (filename_display_string == filename_display_relative)
-    return symtab->filename;
+    return fix_windows_path(symtab->filename);
   else
     internal_error (__FILE__, __LINE__, _("invalid filename_display_string"));
 }
